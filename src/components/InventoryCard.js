@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const InventoryCard = ({ userResourceId, name, description, type, image, status, timeRemaining }) => {
+const InventoryCard = ({ userResourceId, name, description, type, image, status, timeRemaining, onReturn, onDelete }) => {
     return (
         <div className="inventory-card border rounded shadow-md p-4">
             <img src={image} alt={name} className="inventory-image w-full h-48 object-cover rounded mb-4" />
@@ -10,6 +10,20 @@ const InventoryCard = ({ userResourceId, name, description, type, image, status,
             <p className="inventory-type text-gray-500 mb-2">Type: {type}</p>
             <p className="inventory-status text-gray-500 mb-2">Status: {status}</p>
             <p className="inventory-time-remaining text-gray-500">Time Remaining: {timeRemaining}</p>
+            <button
+                onClick={() => onReturn(userResourceId)}
+                className="bg-red-500 text-white px-2 py-1 rounded mt-4"
+            >
+                Return
+            </button>
+            {(status === 'declined' || status === 'cancelled') && (
+                <button
+                    onClick={() => onDelete(userResourceId)}
+                    className="bg-red-500 text-white px-2 py-1 rounded mt-4 ml-2"
+                >
+                    Delete
+                </button>
+            )}
         </div>
     );
 };
@@ -22,6 +36,8 @@ InventoryCard.propTypes = {
     image: PropTypes.string.isRequired,
     status: PropTypes.string.isRequired,
     timeRemaining: PropTypes.string.isRequired,
+    onReturn: PropTypes.func.isRequired,
+    onDelete: PropTypes.func.isRequired,
 };
 
 export default InventoryCard;

@@ -1,5 +1,3 @@
-'use client';
-
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { loginUser } from '@/components/api';
@@ -23,7 +21,7 @@ const LoginForm = () => {
 
         try {
             await loginUser(formData);
-            router.push('/resources');
+            router.push('/resource');
         } catch (error) {
             setErrorMessage(error.message || 'An unexpected error occurred');
         }

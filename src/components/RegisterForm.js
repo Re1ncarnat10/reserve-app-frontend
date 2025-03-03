@@ -1,11 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { registerUser } from '@/components/api';
 
 const RegisterForm = ({ onToggleToLoginAction }) => {
-    const router = useRouter();
     const [formData, setFormData] = useState({
         name: '',
         surname: '',
