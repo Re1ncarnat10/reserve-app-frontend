@@ -1,10 +1,12 @@
-'use client';
+// src/app/admin/manage/page.js
+'use client'
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { fetchResources, fetchUsers, updateUser, deleteUser, createResource, updateResource, fetchRequests, decideRequest, deleteResource } from '@/components/api';
 import UserCard from '@/components/UserCard';
 import AdminResourceCard from '@/components/AdminResourceCard';
 import RequestForm from '@/components/RequestForm';
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 
 const AdminManagePage = () => {
     const [resources, setResources] = useState([]);
@@ -13,15 +15,15 @@ const AdminManagePage = () => {
     const [setError] = useState(null);
     const [alert, setAlert] = useState(null);
     const [alertType, setAlertType] = useState('');
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [resourceToDelete, setResourceToDelete] = useState(null);
     const [newResource, setNewResource] = useState({
         name: '',
         description: '',
         type: '',
-        image: '',
-        availability: ''
+        image: ''
     });
-    const placeholderImage = 'https://via.placeholder.com/320';
 
     useEffect(() => {
         const fetchDataAsync = async () => {
@@ -33,29 +35,14 @@ const AdminManagePage = () => {
                 ]);
                 setResources(resourcesData);
                 setUsers(usersData);
-                setRequests(requestsData.filter(request => request.status === 'waiting for approval'));
+                setRequests(requestsData);
             } catch (error) {
                 setError('Failed to fetch data');
             }
         };
 
-        (async () => {
-            await fetchDataAsync();
-        })();
+        fetchDataAsync();
     }, []);
-
-    const handleImageChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setNewResource(prevResource => ({ ...prevResource, image: reader.result }));
-            };
-            reader.readAsDataURL(file);
-        } else {
-            setNewResource(prevResource => ({ ...prevResource, image: placeholderImage }));
-        }
-    };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -66,7 +53,7 @@ const AdminManagePage = () => {
         e.preventDefault();
         const resourceData = {
             ...newResource,
-            image: newResource.image || placeholderImage,
+            availability: true,
         };
 
         try {
@@ -74,7 +61,7 @@ const AdminManagePage = () => {
             setResources(prevResources => [...prevResources, newResourceData]);
             setAlert('Resource successfully created!');
             setAlertType('success');
-            setIsModalOpen(false);
+            setIsAddModalOpen(false);
         } catch (error) {
             setAlert('Error creating resource: ' + error.message);
             setAlertType('error');
@@ -93,7 +80,7 @@ const AdminManagePage = () => {
     const handleDeleteResource = useCallback(async (resourceId) => {
         try {
             await deleteResource(resourceId);
-            setResources(prevResources => prevResources.filter(resource => resource.id !== resourceId));
+            setResources(prevResources => prevResources.filter(resource => resource.resourceId !== resourceId));
         } catch (error) {
             setError('Failed to delete resource');
         }
@@ -126,6 +113,23 @@ const AdminManagePage = () => {
         }
     }, []);
 
+    const openDeleteModal = (resourceId) => {
+        setResourceToDelete(resourceId);
+        setIsDeleteModalOpen(true);
+    };
+
+    const closeDeleteModal = () => {
+        setResourceToDelete(null);
+        setIsDeleteModalOpen(false);
+    };
+
+    const confirmDeleteResource = async () => {
+        if (resourceToDelete) {
+            await handleDeleteResource(resourceToDelete);
+            closeDeleteModal();
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-50 p-4">
             <h1 className="text-3xl font-bold mb-4">Admin Management</h1>
@@ -135,12 +139,12 @@ const AdminManagePage = () => {
                 </div>
             )}
             <button
-                onClick={() => setIsModalOpen(true)}
+                onClick={() => setIsAddModalOpen(true)}
                 className="bg-green-500 text-white px-4 py-2 rounded mb-4"
             >
                 Add Resource
             </button>
-            {isModalOpen && (
+            {isAddModalOpen && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
                     <div className="bg-white p-4 rounded shadow-lg">
                         <h2 className="text-2xl font-bold mb-4">Create Resource</h2>
@@ -186,22 +190,12 @@ const AdminManagePage = () => {
                             </div>
                             <div className="mb-5">
                                 <label htmlFor="image" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                                    Image
-                                </label>
-                                <input
-                                    type="file"
-                                    onChange={handleImageChange}
-                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                />
-                            </div>
-                            <div className="mb-5">
-                                <label htmlFor="availability" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                                    Availability
+                                    Image URL
                                 </label>
                                 <input
                                     type="text"
-                                    name="availability"
-                                    value={newResource.availability}
+                                    name="image"
+                                    value={newResource.image}
                                     onChange={handleInputChange}
                                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                 />
@@ -209,7 +203,7 @@ const AdminManagePage = () => {
                             <div className="flex justify-end">
                                 <button
                                     type="button"
-                                    onClick={() => setIsModalOpen(false)}
+                                    onClick={() => setIsAddModalOpen(false)}
                                     className="bg-gray-500 text-white px-4 py-2 rounded mr-2"
                                 >
                                     Cancel
@@ -229,10 +223,10 @@ const AdminManagePage = () => {
                 <h2 className="text-2xl font-bold mb-2">Resources</h2>
                 {resources.map(resource => (
                     <AdminResourceCard
-                        key={resource.id}
+                        key={resource.resourceId}
                         resource={resource}
                         onEdit={handleUpdateResource}
-                        onDelete={handleDeleteResource}
+                        onDelete={openDeleteModal}
                     />
                 ))}
             </div>
@@ -257,6 +251,12 @@ const AdminManagePage = () => {
                     />
                 ))}
             </div>
+            {isDeleteModalOpen && (
+                <DeleteConfirmationModal
+                    onConfirm={confirmDeleteResource}
+                    onCancel={closeDeleteModal}
+                />
+            )}
         </div>
     );
 };

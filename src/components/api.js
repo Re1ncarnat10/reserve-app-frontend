@@ -115,7 +115,7 @@ export const deleteUser = async (userId) => {
 };
 
 export const fetchRequests = async () => {
-    const response = await fetch(`${API_BASE_URL}/api/admin/requests`);
+    const response = await fetch(`${API_BASE_URL}/api/Admin/requests`);
     if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
     }
