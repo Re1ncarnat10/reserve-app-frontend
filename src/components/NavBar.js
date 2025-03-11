@@ -29,22 +29,30 @@ const Navbar = () => {
             setIsAdmin(false);
             setIsLoggedIn(false);
             navigate.push('/');
+            window.location.reload();
         }
     };
 
     return (
-        <nav className="bg-blue-600 p-4 shadow-md">
+        <nav className=" p-4 shadow-md" style={{ backgroundColor: '#6D4C41' }}>
             <div className="container mx-auto flex justify-between items-center">
                 <div className="flex space-x-4">
                     <Link href="/" className="text-white text-lg font-semibold hover:text-blue-200">
                         Main Page
                     </Link>
-                    <Link href="/resource" className="text-white text-lg font-semibold hover:text-blue-200">
+                    <Link href="/resources" className="text-white text-lg font-semibold hover:text-blue-200">
                         Resources
                     </Link>
-                    <Link href="/user/inventory" className="text-white text-lg font-semibold hover:text-blue-200">
-                        Inventory
-                    </Link>
+                    {isLoggedIn && (
+                        <>
+                            <Link href="/user/inventory" className="text-white text-lg font-semibold hover:text-blue-200">
+                                Inventory
+                            </Link>
+                            <Link href="/user/me" className="text-white text-lg font-semibold hover:text-blue-200">
+                                My Profile
+                            </Link>
+                        </>
+                    )}
                     {isAdmin && (
                         <Link href="/admin/manage" className="text-white text-lg font-semibold hover:text-blue-200">
                             Manager Panel

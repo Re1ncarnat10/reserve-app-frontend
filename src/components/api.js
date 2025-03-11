@@ -13,6 +13,10 @@ export const checkAdminStatus = async () => {
         });
 
         if (!response.ok) {
+            if (response.status === 401) {
+                console.warn('User is not authorized as admin');
+                return false;
+            }
             if (response.status !== 403) {
                 throw new Error('Error checking admin status');
             }
@@ -26,8 +30,56 @@ export const checkAdminStatus = async () => {
     }
 };
 
+export const fetchUserResources = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        throw new Error('User is not logged in');
+    }
+
+    const response = await fetch(`${API_BASE_URL}/api/userresource/inventory`, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return response.json();
+};
+
+export const approveUserRequest = async (userId, resourceId) => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_BASE_URL}/api/admin/request/approve/${userId}/${resourceId}`, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+
+    if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(errorMessage || 'Error approving request');
+    }
+};
+
+export const rejectUserRequest = async (userId, resourceId) => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_BASE_URL}/api/admin/request/reject/${userId}/${resourceId}`, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+    if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(errorMessage || 'Error rejecting request');
+    }
+};
+
 export const fetchResources = async () => {
-    const response = await fetch(`${API_BASE_URL}/api/resource/resources`);
+    const response = await fetch(`${API_BASE_URL}/api/Resource/resources`);
     if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -86,10 +138,19 @@ export const deleteResource = async (id) => {
 };
 
 export const fetchUsers = async () => {
-    const response = await fetch(`${API_BASE_URL}/api/admin/users`);
+    const token = localStorage.getItem('token');
+    const response = await fetch('http://localhost:5033/api/admin/users', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        }
+    });
+
     if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error('Failed to fetch users');
     }
+
     return response.json();
 };
 
@@ -114,21 +175,39 @@ export const deleteUser = async (userId) => {
     }
 };
 
-export const fetchRequests = async () => {
-    const response = await fetch(`${API_BASE_URL}/api/Admin/requests`);
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return response.json();
-};
 
-export const decideRequest = async (requestId) => {
-    const response = await fetch(`${API_BASE_URL}/api/admin/request/${requestId}/accept`, {
-        method: 'PUT',
+export const fetchRequests = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        throw new Error('User is not logged in');
+    }
+
+    const response = await fetch(`${API_BASE_URL}/api/Admin/requests`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        }
     });
+
     if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
     }
+    const requests = await response.json();
+
+    const [users, resources] = await Promise.all([fetchUsers(), fetchResources()]);
+
+    return requests.map(request => {
+        const user = users.find(u => u.id === request.userId);
+        const resource = resources.find(r => r.resourceId === request.resourceId);
+        return {
+            ...request,
+            userName: `${user.name} ${user.surname}`,
+            resourceImage: resource.image,
+            rentalStartDate: request.rentalStartTime,
+            rentalEndDate: request.rentalEndTime,
+        };
+    });
 };
 
 export const loginUser = async (loginData) => {
@@ -170,11 +249,23 @@ export const registerUser = async (registerData) => {
     return response.json();
 };
 
-export const getUserInfo = async (userId) => {
-    const response = await fetch(`${API_BASE_URL}/api/user/${userId}`);
+export const getCurrentUserInfo = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        throw new Error('User is not logged in');
+    }
+
+    const response = await fetch(`${API_BASE_URL}/api/User/me`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+
     if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
     }
+
     return response.json();
 };
 
@@ -227,18 +318,64 @@ export const requestResource = async (requestDto) => {
 };
 
 export const returnResource = async (userResourceId) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        throw new Error('User is not logged in');
+    }
+
     const response = await fetch(`${API_BASE_URL}/api/userresource/return/${userResourceId}`, {
         method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
     });
+
     if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
     }
     return response.json();
 };
 
-export const deleteUserResource = async (userResourceId) => {
-    const response = await fetch(`${API_BASE_URL}/api/userresource/${userResourceId}`, {
+
+export const fetchExpiredResources = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        throw new Error('User is not logged in');
+    }
+
+    const response = await fetch(`${API_BASE_URL}/api/Admin/expired-resources`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        }
+    });
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const expiredResources = await response.json();
+
+    const [users, resources] = await Promise.all([fetchUsers(), fetchResources()]);
+
+    return expiredResources.map(resource => {
+        const user = users.find(u => u.id === resource.userId);
+        const resourceDetails = resources.find(r => r.resourceId === resource.resourceId);
+        return {
+            ...resource,
+            userName: user ? `${user.name} ${user.surname}` : 'Unknown User',
+            resourceName: resourceDetails ? resourceDetails.name : 'Unknown Resource',
+            resourceImage: resourceDetails ? resourceDetails.image : '',
+        };
+    });
+};
+
+export const adminReturnResource = async (userResourceId) => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_BASE_URL}/api/Admin/return-resource/${userResourceId}`, {
         method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
     });
     if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

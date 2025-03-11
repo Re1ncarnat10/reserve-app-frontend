@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { loginUser } from '@/components/api';
 
 const LoginForm = () => {
-    const router = useRouter();
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -21,7 +19,7 @@ const LoginForm = () => {
 
         try {
             await loginUser(formData);
-            router.push('/resource');
+            window.location.reload();
         } catch (error) {
             setErrorMessage(error.message || 'An unexpected error occurred');
         }
@@ -31,7 +29,7 @@ const LoginForm = () => {
         <>
             {errorMessage && <div className="text-red-500">{errorMessage}</div>}
 
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} className="p-4 mb-4 border rounded-lg shadow-md w-full min-h-[180px]" style={{ backgroundColor: '#BCAAA4' }}>
                 <h2 className="text-2xl font-bold mb-4">Login</h2>
                 <div className="mb-4">
                     <label htmlFor="email" className="block text-gray-700">Email:</label>
@@ -57,7 +55,8 @@ const LoginForm = () => {
                 </div>
                 <button
                     type="submit"
-                    className="w-full bg-blue-600 text-white p-2 rounded mb-4"
+                    className="w-full  text-white p-2 rounded mb-4 "
+                    style={{ backgroundColor: '#6D4C41' }}
                 >
                     Login
                 </button>

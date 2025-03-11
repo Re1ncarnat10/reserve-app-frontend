@@ -2,19 +2,19 @@ import React from 'react';
 
 const UserCard = ({ user, onEdit, onDelete }) => {
     return (
-        <div className="flex items-center p-4 mb-4 border rounded-lg shadow-md bg-white w-full min-h-[180px]">
+        <div className="flex items-center p-4 mb-4 border rounded-lg shadow-md w-full min-h-[180px]" style={{ backgroundColor: '#BCAAA4' }}>
             <div className="flex-1 grid grid-cols-5 gap-4 items-center text-center">
-                <div className="bg-gray-100 p-4 rounded-lg">
+                <div className="p-4 rounded-lg" style={{ backgroundColor: '#D7CCC8' }}>
                     <p className="text-sm text-gray-600">Name</p>
-                    <p className="font-semibold">{user.name} {user.surname}</p>
+                    <p className="font-semibold text-black">{user.name} {user.surname}</p>
                 </div>
-                <div className="bg-gray-100 p-4 rounded-lg col-span-2">
+                <div className="p-4 rounded-lg col-span-2" style={{ backgroundColor:  '#D7CCC8' }}>
                     <p className="text-sm text-gray-600">Email</p>
-                    <p className="font-semibold truncate">{user.email}</p>
+                    <p className="font-semibold truncate text-black">{user.email}</p>
                 </div>
-                <div className="bg-gray-100 p-4 rounded-lg col-span-2">
+                <div className="p-4 rounded-lg col-span-2" style={{ backgroundColor:  '#D7CCC8' }}>
                     <p className="text-sm text-gray-600">Department</p>
-                    <p className="font-semibold truncate">{user.department}</p>
+                    <p className="font-semibold truncate text-black">{user.department}</p>
                 </div>
             </div>
 

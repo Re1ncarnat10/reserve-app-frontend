@@ -47,7 +47,7 @@ const RegisterForm = ({ onToggleToLoginAction }) => {
             {errorMessage && <div className="text-red-500">{errorMessage}</div>}
             {successMessage && <div className="text-green-500">{successMessage}</div>}
 
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} className="p-4 mb-4 border rounded-lg shadow-md w-full min-h-[180px]" style={{ backgroundColor: '#BCAAA4' }}>
                 <h2 className="text-2xl font-bold mb-4">Register</h2>
                 <div className="mb-4">
                     <label htmlFor="name" className="block text-gray-700">Name:</label>
@@ -117,7 +117,8 @@ const RegisterForm = ({ onToggleToLoginAction }) => {
                 </div>
                 <button
                     type="submit"
-                    className="w-full bg-blue-600 text-white p-2 rounded mb-4"
+                    className="w-full text-white p-2 rounded mb-4"
+                    style={{ backgroundColor: '#6D4C41' }}
                 >
                     Register
                 </button>
