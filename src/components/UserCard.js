@@ -1,6 +1,6 @@
 import React from 'react';
 
-const UserCard = ({ user, onEdit, onDelete }) => {
+const UserCard = ({ user, onDelete }) => {
     return (
         <div className="flex items-center p-4 mb-4 border rounded-lg shadow-md w-full min-h-[180px]" style={{ backgroundColor: '#BCAAA4' }}>
             <div className="flex-1 grid grid-cols-5 gap-4 items-center text-center">
@@ -18,13 +18,7 @@ const UserCard = ({ user, onEdit, onDelete }) => {
                 </div>
             </div>
 
-            <div className="flex space-x-4 ml-8">
-                <button
-                    onClick={() => onEdit(user.id)}
-                    className="bg-blue-500 text-white px-6 py-3 rounded-lg shadow hover:bg-blue-600 text-lg"
-                >
-                    Edit
-                </button>
+            <div className="flex ml-8">
                 <button
                     onClick={() => onDelete(user.id)}
                     className="bg-red-500 text-white px-6 py-3 rounded-lg shadow hover:bg-red-600 text-lg"

@@ -4,7 +4,7 @@ export const checkAdminStatus = async () => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/admin/initialize-admin`, {
+        const response = await fetch(`${API_BASE_URL}/api/Admin/initialize-admin`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -51,7 +51,7 @@ export const fetchUserResources = async () => {
 
 export const approveUserRequest = async (userId, resourceId) => {
     const token = localStorage.getItem('token');
-    const response = await fetch(`${API_BASE_URL}/api/admin/request/approve/${userId}/${resourceId}`, {
+    const response = await fetch(`${API_BASE_URL}/api/Admin/request/approve/${userId}/${resourceId}`, {
         method: 'PUT',
         headers: {
             'Authorization': `Bearer ${token}`
@@ -66,7 +66,7 @@ export const approveUserRequest = async (userId, resourceId) => {
 
 export const rejectUserRequest = async (userId, resourceId) => {
     const token = localStorage.getItem('token');
-    const response = await fetch(`${API_BASE_URL}/api/admin/request/reject/${userId}/${resourceId}`, {
+    const response = await fetch(`${API_BASE_URL}/api/Admin/request/reject/${userId}/${resourceId}`, {
         method: 'PUT',
         headers: {
             'Authorization': `Bearer ${token}`
@@ -118,19 +118,34 @@ export const createResource = async (resourceData) => {
 };
 
 export const updateResource = async (id, resourceData) => {
-    const response = await fetch(`${API_BASE_URL}/api/admin/resource/${id}`, {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_BASE_URL}/api/Admin/resource/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(resourceData),
     });
+
     if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.includes("application/json") && response.headers.get("content-length") !== "0") {
+        return response.json();
+    } else {
+        return resourceData;
     }
 };
 
 export const deleteResource = async (id) => {
+    const token = localStorage.getItem('token');
     const response = await fetch(`${API_BASE_URL}/api/Admin/resource/${id}`, {
         method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
     });
     if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -139,7 +154,7 @@ export const deleteResource = async (id) => {
 
 export const fetchUsers = async () => {
     const token = localStorage.getItem('token');
-    const response = await fetch('http://localhost:5033/api/admin/users', {
+    const response = await fetch(`${API_BASE_URL}/api/Admin/users`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -154,27 +169,18 @@ export const fetchUsers = async () => {
     return response.json();
 };
 
-export const updateUser = async (userId, userData) => {
-    const response = await fetch(`${API_BASE_URL}/api/admin/user/${userId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData),
-    });
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return response.json();
-};
-
 export const deleteUser = async (userId) => {
-    const response = await fetch(`${API_BASE_URL}/api/admin/user/${userId}`, {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_BASE_URL}/api/Admin/user/${userId}`, {
         method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
     });
     if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
     }
 };
-
 
 export const fetchRequests = async () => {
     const token = localStorage.getItem('token');

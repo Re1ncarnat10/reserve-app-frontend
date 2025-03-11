@@ -78,11 +78,16 @@ const AdminManagePage = () => {
     const handleUpdateResource = useCallback(async (resourceId, resourceData) => {
         try {
             const updatedResource = await updateResource(resourceId, resourceData);
-            setResources(prevResources => prevResources.map(resource => resource.resourceId === resourceId ? updatedResource : resource));
+            setResources(prevResources => prevResources.map(resource =>
+                resource.resourceId === resourceId ? updatedResource : resource
+            ));
+            setAlert('Resource successfully updated!');
+            setAlertType('success');
         } catch (error) {
-            setError('Failed to update resource');
+            setAlert('Error updating resource: ' + error.message);
+            setAlertType('error');
         }
-    }, [setError]);
+    }, []);
 
     const handleDeleteResource = useCallback(async (resourceId) => {
         try {
@@ -90,15 +95,6 @@ const AdminManagePage = () => {
             setResources(prevResources => prevResources.filter(resource => resource.resourceId !== resourceId));
         } catch (error) {
             setError('Failed to delete resource');
-        }
-    }, [setError]);
-
-    const handleUpdateUser = useCallback(async (userId, userData) => {
-        try {
-            const updatedUser = await updateUser(userId, userData);
-            setUsers(prevUsers => prevUsers.map(user => user.id === userId ? updatedUser : user));
-        } catch (error) {
-            setError('Failed to update user');
         }
     }, [setError]);
 
@@ -196,7 +192,6 @@ const AdminManagePage = () => {
                         <UserCard
                             key={user.id}
                             user={user}
-                            onEdit={handleUpdateUser}
                             onDelete={handleDeleteUser}
                         />
                     ))}
