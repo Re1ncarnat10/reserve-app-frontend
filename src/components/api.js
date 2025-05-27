@@ -388,3 +388,23 @@ export const adminReturnResource = async (userResourceId) => {
     }
     return response.json();
 };
+
+export const getUserHistory = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        throw new Error('User is not logged in');
+    }
+
+    const response = await fetch(`${API_BASE_URL}/api/User/me/history`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error('Nie udało się pobrać historii użytkownika');
+    }
+
+    return response.json();
+};

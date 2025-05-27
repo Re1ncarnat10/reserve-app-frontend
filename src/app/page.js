@@ -4,10 +4,36 @@ import React, { useState, useEffect } from 'react';
 import LoginForm from '@/components/LoginForm';
 import RegisterForm from '@/components/RegisterForm';
 import { useRouter } from 'next/navigation';
+import { fetchUserResources } from '@/components/api';
+
+
+function useApprovedNotification() {
+    const [notification, setNotification] = useState(null);
+
+    useEffect(() => {
+        const checkApproved = async () => {
+            try {
+                const data = await fetchUserResources();
+                const approved = data.filter(r => r.status === "approved");
+                const prevApprovedIds = JSON.parse(localStorage.getItem("approvedResourceIds") || "[]");
+                const newApproved = approved.filter(r => !prevApprovedIds.includes(r.resourceId));
+                if (newApproved.length > 0) {
+                    setNotification(`${newApproved.length} zasobów zostało zaakceptowanych, sprawdź inwentarz.`);
+                    localStorage.setItem("approvedResourceIds", JSON.stringify(approved.map(r => r.resourceId)));
+                }
+            } catch {}
+        };
+        const token = localStorage.getItem("token");
+        if (token) checkApproved();
+    }, []);
+
+    return [notification, setNotification];
+}
 
 export default function HomePage() {
     const [activeForm, setActiveForm] = useState('login');
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [notification, setNotification] = useApprovedNotification();
     const router = useRouter();
 
     useEffect(() => {
@@ -24,6 +50,13 @@ export default function HomePage() {
     return (
         <div className="min-h-screen flex flex-col items-center p-4" style={{ backgroundColor: '#8D6E63' }}>
             <h1 className="text-5xl font-bold my-8 text-white">Reserve</h1>
+
+            {notification && (
+                <div className="fixed top-6 right-6 bg-green-600 text-white p-4 rounded shadow-lg z-50 animate-bounce flex items-center">
+                    {notification}
+                    <button className="ml-4 text-white font-bold text-xl" onClick={() => setNotification(null)}>×</button>
+                </div>
+            )}
 
             {!isLoggedIn ? (
                 <div className="p-8 rounded-lg w-full max-w-md h-[750px] flex flex-col shadow-xl"
@@ -117,7 +150,7 @@ export default function HomePage() {
                             <p className="text-gray-600">View and edit your account information</p>
                         </div>
 
-                        <div onClick={() => navigateTo('/user/history')}
+                        <div onClick={() => navigateTo('/user/me/history')}
                              className="bg-amber-50 rounded-xl p-6 shadow-md cursor-pointer hover:shadow-lg transition-all transform hover:-translate-y-1"
                              style={{ backgroundColor: '#D7CCC8' }}>
                             <div className="flex items-center mb-4">
@@ -126,7 +159,7 @@ export default function HomePage() {
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                 </div>
-                                <h3 className="text-xl font-bold text-gray-800">Rental History - In Progress</h3>
+                                <h3 className="text-xl font-bold text-gray-800">Rental History</h3>
                             </div>
                             <p className="text-gray-600">View your past and current rentals</p>
                         </div>

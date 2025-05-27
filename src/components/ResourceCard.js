@@ -32,7 +32,8 @@ const ResourceCard = ({ resourceId, name, description, type, image, availability
             </p>
             <button
                 onClick={handleRequestClick}
-                className="btn btn-primary w-full py-3 text-lg font-semibold tracking-wide"
+                className={`btn btn-primary w-full py-3 text-lg font-semibold tracking-wide ${!availability ? 'opacity-50 cursor-not-allowed' : ''}`}
+                disabled={!availability}
             >
                 Request
             </button>

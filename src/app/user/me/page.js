@@ -116,6 +116,13 @@ export default function UserProfilePage() {
                         >
                             Edit My Profile
                         </button>
+
+                        <button
+                            onClick={() => router.push('/user/me/history')}
+                            className="w-full bg-amber-400 hover:bg-amber-500 text-white font-medium py-3 px-6 rounded-lg shadow transition duration-200 mt-2"
+                        >
+                            View My Rental History
+                        </button>
                     </div>
                 )}
 
